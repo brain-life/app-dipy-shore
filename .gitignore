@@ -1,0 +1,8 @@
+config.json
+config1.json
+*~
+.DS_Store
+.idea
+finished
+volume.nii.gz
+*.tck

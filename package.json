@@ -1,0 +1,23 @@
+{
+  "name": "app-dipy-shore",
+  "version": "1.0.0",
+  "description": "multishell tracking w/ shore model of white matter tracts",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "start.sh",
+    "stop": "stop.sh",
+    "status": "status.sh"
+
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brain-life/app-dipy-shore.git"
+  },
+  "author": "Aman Arya <aarya22@uw.edu>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/brain-life/app-dipy-shore/issues"
+  },
+  "homepage": "https://github.com/brain-life/app-dipy-shore#readme"
+}
