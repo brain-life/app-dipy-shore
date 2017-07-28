@@ -9,6 +9,7 @@ from dipy.viz.colormap import line_colors
 from dipy.tracking import utils
 from dipy.io.gradients import read_bvals_bvecs
 from dipy.reconst.shore import ShoreModel
+from dipy.reconst.shm import CsaOdfModel
 from dipy.data import default_sphere
 from dipy.direction import peaks_from_model
 from dipy.tracking.local import ThresholdTissueClassifier
@@ -17,6 +18,7 @@ from nibabel.streamlines import Tractogram, save
 from dipy.reconst.csdeconv import (ConstrainedSphericalDeconvModel,
                                    auto_response)
 from dipy.direction import ProbabilisticDirectionGetter
+import codecs
 """
 env = os.environ['ENV']
 if env == 'IUHPC':
@@ -39,7 +41,9 @@ def main():
     aparc = aparc_im.get_data()
     end = time.time()
     print('Loaded Files: ' + str((end - start)))
-
+    print(dmri.shape)
+    print(aparc.shape)
+    
     # Create the white matter and callosal masks
     start = time.time()
     wm_regions = [2, 41, 16, 17, 28, 60, 51, 53, 12, 52, 12, 52, 13, 18,
@@ -48,7 +52,12 @@ def main():
     wm_mask = np.zeros(aparc.shape)
     for l in wm_regions:
         wm_mask[aparc == l] = 1
-
+    #np.save('wm_mask',wm_mask)
+    #p = os.getcwd()+'wm.json'
+    #json.dump(wm_mask, codecs.open(p, 'w', encoding='utf-8'), separators=(',', ':'), sort_keys=True, indent=4) 
+    #with open('wm_mask.txt', 'wb') as wm: 
+    #np.savetxt('wm.txt', wm_mask, fmt='%5s')
+    #print(wm_mask)
     # Create the gradient table from the bvals and bvecs
 
     bvals, bvecs = read_bvals_bvecs(config['data_bval'], config['data_bvec'])
@@ -72,8 +81,12 @@ def main():
     # Use the SHORE model to find Orientation Dist. Function
     start = time.time()
     shore_model = ShoreModel(gtab)
-    shore_peaks = peaks_from_model(shore_model, dmri, default_sphere,relative_peak_threshold=.8, min_separation_angle=45, mask=wm_mask)
+    shore_peaks = peaks_from_model(shore_model, dmri, default_sphere,
+                                 relative_peak_threshold=.8,
+                                 min_separation_angle=45,
+                                 mask=wm_mask)
     print('Creating Shore Model: ' + str(time.time() - start))
+
 
     # Begins the seed in the wm tracts
     seeds = utils.seeds_from_mask(wm_mask, density=[1, 1, 1], affine=affine)
@@ -84,7 +97,7 @@ def main():
 
     response, ratio = auto_response(gtab, dmri, roi_radius=10, fa_thr=0.7)
     csd_model = ConstrainedSphericalDeconvModel(gtab, response, sh_order=6)
-    csd_fit = csd_model.fit(dmri, mask=wm_mask)
+    csd_fit = csd_model.fit(data=dmri, mask=wm_mask)
     print ('Created the CSD model: ' + str(time.time() - start))
 
     # Set the Direction Getter to randomly choose directions
@@ -107,11 +120,13 @@ def main():
     streamlines = list(streamlines)
     print('Computed streamlines: ' + str(time.time() - start))
     
-    from dipy.tracking.streamline import transform_streamlines
-    streamlines = transform_streamlines(streamlines, np.linalg.inv(affine)) 
+    #from dipy.tracking.streamline import transform_streamlines
+    #streamlines = transform_streamlines(streamlines, np.linalg.inv(affine)) 
+    
     # Create a tractogram from the streamlines and save it 
     tractogram = Tractogram(streamlines, affine_to_rasmm=affine)
     save(tractogram, 'track.tck')
     end = time.time()
     print("Created the tck file: " + str((end - start)))
+
 main()
