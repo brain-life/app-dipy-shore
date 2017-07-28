@@ -25,8 +25,9 @@ if [ $ENV == "IUHPC" ]; then
 fi
 
 if [ $ENV == "VM" ]; then
-	export PYTHONPATH=/usr/local/dipy:$PYTHONPATH
-	export PYTHONPATH=/usr/local/nibabel:$PYTHONPATH
+	source activate dipyenv
+	#export PYTHONPATH=/usr/local/dipy:$PYTHONPATH
+	#export PYTHONPATH=/usr/local/nibabel:$PYTHONPATH
 fi
 
 input_nii_gz=`$SERVICE_DIR/jq -r .data_file config.json`
