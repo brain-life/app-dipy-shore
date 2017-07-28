@@ -25,6 +25,8 @@ if [ $ENV == "IUHPC" ]; then
 fi
 
 if [ $ENV == "VM" ]; then
+	source activate dipyenv
+	echo "activate dipyenv"
 	export PYTHONPATH=/usr/local/dipy:$PYTHONPATH
 	export PYTHONPATH=/usr/local/nibabel:$PYTHONPATH
 fi
